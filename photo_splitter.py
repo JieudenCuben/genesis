@@ -1,9 +1,11 @@
 import dlib
 import cv2
-import matplotlib.pyplot as plt
 
-image_path = '/Users/isaacjieu/Documents/projects/genesis/test_images/x-axis.jpeg'
+image_path = input('image path: ')
 image = cv2.imread(image_path)
+
+if image is None:
+    exit()
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -11,10 +13,19 @@ detector = dlib.get_frontal_face_detector()
 
 faces = detector(gray)
 
-for face in faces:
-    x, y, w, h = (face.left(), face.top(), face.width(), face.height())
-    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+if not faces:
+    exit()
 
-plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-plt.axis('off')
-plt.show()
+for i, face in enumerate(faces):
+    x, y, w, h = (face.left(), face.top(), face.width(), face.height())
+
+    if x < 0 or y < 0 or x + w > image.shape[1] or y + h > image.shape[0]:
+        continue
+
+    cropped_image = image[y:y + h, x:x + w]
+
+    if cropped_image.size == 0:
+        continue
+
+    cropped_image_path = f'/Users/isaacjieu/Documents/projects/genesis/faces/face_{i + 1}.jpg'
+    cv2.imwrite(cropped_image_path, cropped_image)
